@@ -1,0 +1,40 @@
+Slide 1:
+Introduction - Dots and boxes 
+Subject - Java Programming
+Kavya & Vanraj
+
+Slide 2: Introduction
+Overview of Dots and boxes
+
+Slide 3:
+3 scenes (Main menu, game settings, game board)
+
+Slide 4:
+Main Menu
+	Play!
+	Quit
+
+Slide 5:
+Game Settings
+	Player 1 Name - Textbox
+	Player 2 Name - Textbox
+	Board Size - Drop down
+	Confirm Button
+	Back button
+
+Slide 6:
+Game Board
+	Game Board
+	Display - No. of players
+	Display - Score of individual players
+	Display 
+	Exit to Main Menu
+
+Slide 7:
+using VS-IDE, Also imported javaFx - (used GitHub for collab and version control)
+
+Slide 8:
+Conclusion
+
+Slide 9:
+Thank You!

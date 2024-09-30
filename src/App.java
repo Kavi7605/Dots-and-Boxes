@@ -25,34 +25,27 @@ public class App extends Application {
         Scene scene = new Scene(root, Color.LIGHTSKYBLUE);
 
         // Adding buttons
-        Button newGame = new Button("New Game");
-        Button continueButton = new Button("Continue");
-        Button exitButton = new Button("Exit");
+        Button playButton = new Button("Play");
+        Button quitButton = new Button("Quit");
 
         // Set button size and style for 'New Game'
-        newGame.setPrefWidth(150);
-        newGame.setPrefHeight(50);
-        newGame.setStyle("-fx-font-size: 16px; -fx-background-color: #4CAF50; -fx-text-fill: white;");
+        playButton.setPrefWidth(200);
+        playButton.setPrefHeight(70);
+        playButton.setStyle("-fx-font-size: 22px; -fx-background-color: #4CAF50; -fx-text-fill: white;");
 
-        // Set button size and style for 'Continue'
-        continueButton.setPrefWidth(150);
-        continueButton.setPrefHeight(50);
-        continueButton.setStyle("-fx-font-size: 16px; -fx-background-color: #2196F3; -fx-text-fill: white;");
-
-        // Set button size and style for 'Exit'
-        exitButton.setPrefWidth(150);
-        exitButton.setPrefHeight(50);
-        exitButton.setStyle("-fx-font-size: 16px; -fx-background-color: #F44336; -fx-text-fill: white;");
+        // Set button size and style for 'Quit'
+        quitButton.setPrefWidth(200);
+        quitButton.setPrefHeight(70);
+        quitButton.setStyle("-fx-font-size: 22px; -fx-background-color: #F44336; -fx-text-fill: white;");
 
         // Set actions for buttons
-        newGame.setOnAction(e -> System.out.println("New Game clicked!"));
-        continueButton.setOnAction(e -> System.out.println("Continue clicked!"));
-        exitButton.setOnAction(e -> Platform.exit());
+        playButton.setOnAction(e -> System.out.println("New Game clicked!"));
+        quitButton.setOnAction(e -> Platform.exit());
 
         // Add buttons to a VBox (vertical layout)
         VBox vbox = new VBox(20); // 20 is the spacing between the buttons
         vbox.setAlignment(Pos.CENTER); // Center all buttons
-        vbox.getChildren().addAll(newGame, continueButton, exitButton);
+        vbox.getChildren().addAll(playButton, quitButton);
 
         // Add VBox to the root StackPane
         root.getChildren().add(vbox);
@@ -69,7 +62,9 @@ public class App extends Application {
         primaryStage.getIcons().add(icon);
 
         // Set the window to fullscreen
-        primaryStage.setFullScreen(true);
+        // primaryStage.setFullScreen(true);
+        
+        primaryStage.setMaximized(true);
 
         // Set the scene to the primaryStage
         primaryStage.setScene(scene);
@@ -78,9 +73,8 @@ public class App extends Application {
         primaryStage.show();
     }
 
-    /*private void newGameScreen(){
+    /*private void playButtonScreen(){
         Button backButton = new Button("<");
         backButton.setOnAction(event -> start(null));
-        
     }*/
 }
