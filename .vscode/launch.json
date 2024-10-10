@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "DotsAndBoxes",
+            "request": "launch",
+            "mainClass": "DotsAndBoxes",
+            "projectName": "Dots-and-Boxes_421bcb62"
+        },
+        {
+            "type": "java",
             "name": "App",
             "request": "launch",
             "mainClass": "App",
