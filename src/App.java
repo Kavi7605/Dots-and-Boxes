@@ -4,158 +4,208 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
+import javafx.scene.shape.*;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import java.util.HashMap;
+import java.util.Map;
 
-public class App extends Application {
+public class App extends Application {  
+  private Stage primaryStage;
+  private Scene mainMenuScene, gameBoardScene;  
+  private static final int WINDOW_WIDTH = 800;
+  private static final int WINDOW_HEIGHT = 600;
+  private static final int GRID_SIZE = 5;
+  private static final int SPACING = 50;
+  private static final int LINE_THICKNESS = 5;
+  private static final int DOT_RADIUS = 10;
 
-    private static final int BOARD_SIZE = 5;
-    private static final int WINDOW_WIDTH = 800;
-    private static final int WINDOW_HEIGHT = 600;
+  Line[][] vLines, hLines;
+  Rectangle[][] boxes;
 
-    private Stage primaryStage;
-    private Scene mainMenuScene, gameBoardScene;
-    private int player1Score = 0;
-    private int player2Score = 0;
-    private int currentPlayer = 1;
-    private int[][] lineStates = new int[BOARD_SIZE][BOARD_SIZE]; // 0 for unclaimed, 1 for Player 1, 2 for Player 2
+  private Player player1 = new Player("Player 1", Color.RED);
+  private Player player2 = new Player("Player 2", Color.BLUE);
+  private Player currentPlayer = player1;
 
-    @Override
-    public void start(Stage primaryStage) {
-        this.primaryStage = primaryStage;
-        primaryStage.setTitle("Dots and Boxes");
-        primaryStage.setMaximized(true);
+  private Map<Line, Boolean> lineDrawn = new HashMap<>();
+  //private Map<StackPane, Player> boxOwner1 = new HashMap<>();
+  private Map<Rectangle, Player> boxOwner = new HashMap<>();
 
-        // Create main menu scene
-        mainMenuScene = createMainMenuScene();
+  private Label player1ScoreLabel = new Label();
+  private Label player2ScoreLabel = new Label();
 
-        // Create game board scene
-        gameBoardScene = createGameBoardScene();
+  public static void main(String[] args) {
+      launch(args);
+  }
 
-        // Set initial scene
-        primaryStage.setScene(mainMenuScene);
-        primaryStage.show();
-    }
+  @Override
+  public void start(Stage primaryStage) {
+    this.primaryStage = primaryStage;
+    primaryStage.setTitle("Dots and Boxes");
+    primaryStage.setMaximized(true);
 
-    private Scene createMainMenuScene() {
+    // Create main menu scene
+    mainMenuScene = createMainMenuScene();
+
+    // Create game board scene
+    gameBoardScene = createGameBoardScene();
+
+    // Set initial scene
+    primaryStage.setScene(mainMenuScene);
+    primaryStage.show();
+  }
+
+  private Scene createMainMenuScene() {
+    BorderPane root = new BorderPane();
+    VBox center = new VBox(20);
+    center.setAlignment(Pos.CENTER);
+    
+    Button playButton = new Button("Play");
+    playButton.setOnAction(event -> primaryStage.setScene(gameBoardScene));
+    
+    Button quitButton = new Button("Quit");
+    quitButton.setOnAction(event -> primaryStage.close());
+    
+    center.getChildren().addAll(playButton, quitButton);
+    root.setCenter(center);
+    
+    return new Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT);
+  }
+  private Scene createGameBoardScene() {
+    hLines = new Line[GRID_SIZE][GRID_SIZE-1];
+    vLines = new Line[GRID_SIZE-1][GRID_SIZE];
+
+    GridPane gridPane = new GridPane();
+    gridPane.setPadding(new Insets(LINE_THICKNESS+50, 0, 0, LINE_THICKNESS+50));
+
+    int row, col;
+    for (row = 0; row < GRID_SIZE; row++) {
+      for (col = 0; col < GRID_SIZE; col++) {
+        AnchorPane stack = new AnchorPane();
+
+        if(col < GRID_SIZE-1) {
+          Line lineUP = new Line(LINE_THICKNESS*2, LINE_THICKNESS, SPACING-LINE_THICKNESS, LINE_THICKNESS);
+          styleLine(lineUP);
+          stack.getChildren().add(lineUP);
+          lineDrawn.put(lineUP, false);
+          hLines[row][col] = lineUP;
+        }
+
+        if(row < GRID_SIZE-1) {
+          Line lineLeft = new Line(LINE_THICKNESS, LINE_THICKNESS*2, LINE_THICKNESS, SPACING-LINE_THICKNESS);
+          styleLine(lineLeft);
+          stack.getChildren().add(lineLeft);
+          lineDrawn.put(lineLeft, false);
+          vLines[row][col] = lineLeft;
+        }
+
+        Circle dot = new Circle(LINE_THICKNESS, LINE_THICKNESS, DOT_RADIUS);
+        dot.setFill(Color.BLACK);
+        stack.getChildren().add(dot);
         
-        BorderPane root = new BorderPane();
-        VBox center = new VBox(20);
-        center.setAlignment(Pos.CENTER);
-
-        Button playButton = new Button("Play");
-        playButton.setOnAction(event -> primaryStage.setScene(gameBoardScene));
-
-        Button quitButton = new Button("Quit");
-        quitButton.setOnAction(event -> primaryStage.close());
-
-        center.getChildren().addAll(playButton, quitButton);
-        root.setCenter(center);
-
-        return new Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT);
+        gridPane.add(stack, col, row);
+      }
     }
 
-    Label player1ScoreLabel = new Label(String.valueOf(player1Score));
-    Label player2ScoreLabel = new Label(String.valueOf(player2Score));
+    // Create a border pane to hold the grid and scores
+    BorderPane borderPane = new BorderPane();
+    borderPane.setCenter(gridPane);
 
-    private Scene createGameBoardScene() {
-        BorderPane root = new BorderPane();
-        GridPane grid = new GridPane();
-        grid.setPadding(new Insets(20));
-        grid.setHgap(5);
-        grid.setVgap(5);
+    // Create a grid pane for the score labels
+    GridPane scoreGrid = new GridPane();
+    scoreGrid.add(new Label("Player 1: "), 0, 0);
+    scoreGrid.add(player1ScoreLabel, 1, 0);
+    scoreGrid.add(new Label("Player 2: "), 0, 1);
+    scoreGrid.add(player2ScoreLabel, 1, 1);
 
-        Label player1NameLabel = new Label("Player 1:");
-        player1NameLabel.setFont(new Font(20));
-        grid.add(player1NameLabel, 0, 0);
+    borderPane.setTop(scoreGrid);
 
-        player1ScoreLabel.setFont(new Font(20));
-        grid.add(player1ScoreLabel, 1, 0);
+    updateScores();
+    return new Scene(borderPane, WINDOW_WIDTH, WINDOW_HEIGHT);
+  }
+  
 
-        Label player2NameLabel = new Label("Player 2:");
-        player2NameLabel.setFont(new Font(20));
-        grid.add(player2NameLabel, BOARD_SIZE + 1, 0);
+  private void styleLine(Line line) {
+    line.setStroke(Color.TRANSPARENT);
+    //line.setStroke(Color.BLACK);
+    line.setStrokeLineCap(StrokeLineCap.BUTT);
+    line.setStrokeWidth(LINE_THICKNESS*2);
+    //line.setStroke(lineUnmarkedColor);
 
-        player2ScoreLabel.setFont(new Font(20));
-        grid.add(player2ScoreLabel, BOARD_SIZE + 2, 0);
+    line.setOnMouseEntered(event -> {
+      if (!lineDrawn.get(line)) {
+        line.setStroke(Color.LIGHTGRAY);
+        System.out.println("Mouse Entered");
+      }
+    });
 
-        // Create dots and lines
-        for (int i = 0; i <= BOARD_SIZE; i++) {
-            for (int j = 0; j <= BOARD_SIZE; j++) {
-                Circle dot = new Circle(5);
-                grid.add(dot, j, i);
-                final int k = j;
-                final int l = i;
-                if (i < BOARD_SIZE) {
-                    Line horizontalLine = new Line(0, 0, 50, 0);
-                    horizontalLine.setStrokeWidth(5);
-                    horizontalLine.setOnMouseClicked(event -> handleLineClick(k, l, true));
-                    grid.add(horizontalLine, j, i );
-                }
+    line.setOnMouseExited(event -> {
+      if (!lineDrawn.get(line)) {
+        line.setStroke(Color.TRANSPARENT);
+        System.out.println("Mouse Exited");
+      }
+    });
 
-                if (j < BOARD_SIZE) {
-                    Line verticalLine = new Line(0, 0, 0, 50);
-                    verticalLine.setStrokeWidth(5);
-                    verticalLine.setOnMouseClicked(event -> handleLineClick(k, l, false));
-                    grid.add(verticalLine, j , i);
-                }
-            }
-        }
+    line.setOnMouseClicked(event -> {
+      if (lineDrawn.get(line)) {
+        return; // Skip if line is already filled
+      }
+      line.setStroke(currentPlayer.getColor());
+      lineDrawn.put(line, true);
+      System.out.println("Mouse Clicked");
 
-        root.setCenter(grid);
+      boolean boxCompleted = checkForCompletedBox(line);
+      if (!boxCompleted) {
+        // Switch turn if no box was completed
+        currentPlayer = (currentPlayer == player1) ? player2 : player1;
+      }
+      updateScores();
+    });
+  }
 
-        return new Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT);
+  private boolean checkForCompletedBox(Line line) {
+    boolean boxCompleted = false;
+    
+    // Check for boxes around the line
+    for (Rectangle stack : boxOwner.keySet()) {
+      if (isBoxComplete(stack)) {
+        boxOwner.put(stack, currentPlayer);
+        currentPlayer.increaseScore(1);
+        boxCompleted = true;
+        System.out.println("Box Completed");
+      }
     }
+    return boxCompleted;
+  }
 
-    private void handleLineClick(int x, int y, boolean isHorizontal) {
-        if (lineStates[x][y] !=0) {
-            return; // Line is already claimed
-        }
+  private boolean isBoxComplete(Rectangle stack) {
+    int row = GridPane.getRowIndex(stack);
+    int col = GridPane.getColumnIndex(stack);
 
-        // Claim the line for the current player
-        lineStates[x][y] = currentPlayer;
+    boolean top = isLineDrawn(row - 1, col);
+    boolean bottom = isLineDrawn(row + 1, col);
+    boolean left = isLineDrawn(row, col - 1);
+    boolean right = isLineDrawn(row, col + 1);
 
-        // Check if a box has been completed
-        if (checkBoxCompletion(x, y, isHorizontal)) {
-            updateScore(currentPlayer);
-        }
+    return top && bottom && left && right;
+  }
 
-        // Switch to the other player
-        currentPlayer = 3 - currentPlayer;
+  private boolean isLineDrawn(int row, int col) {
+    // Check if the line at the given position is drawn
+    for (Line line : lineDrawn.keySet()) {
+      int lineRow = GridPane.getRowIndex(line);
+      int lineCol = GridPane.getColumnIndex(line);
+      if (row == lineRow && col == lineCol && lineDrawn.get(line)) {
+          return true;
+      }
     }
+    return false;
+  }
 
-    private boolean checkBoxCompletion(int x, int y, boolean isHorizontal) {
-        if (isHorizontal) {
-            // Check if all four sides of the box are claimed
-            return lineStates[x][y] == lineStates[x + 1][y] &&
-                   lineStates[x][y] == lineStates[x][y - 1] &&
-                   lineStates[x][y] == lineStates[x + 1][y - 1];
-        } else {
-            // Check if all four sides of the box are claimed
-            return lineStates[x][y] == lineStates[x][y + 1] &&
-                   lineStates[x][y] == lineStates[x - 1][y] &&
-                   lineStates[x][y] == lineStates[x - 1][y + 1];
-        }
-    }
-
-    private void updateScore(int player) {
-        if (player == 1) {
-            player1Score++;
-            player1ScoreLabel.setText(String.valueOf(player1Score));
-        } else {
-            player2Score++;
-            player2ScoreLabel.setText(String.valueOf(player2Score));
-        }
-    }
-
-    public static void main(String[] args) {
-        launch(args);
-    }
+  private void updateScores() {
+    player1ScoreLabel.setText(String.valueOf(player1.getScore()));
+    player2ScoreLabel.setText(String.valueOf(player2.getScore()));
+  }
 }
