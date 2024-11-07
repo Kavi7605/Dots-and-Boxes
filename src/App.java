@@ -12,9 +12,7 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.swing.ImageIcon;
-
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
@@ -223,8 +221,9 @@ public class App extends Application {
                 }
                 
                 Alert alert = new Alert(AlertType.INFORMATION, winMsg, new ButtonType("Back to Main Menu"));
+                alert.setTitle("Game Over");
                 alert.setHeaderText(null);
-                alert.setContentText("Game Over");
+                alert.setContentText(winMsg);
                 alert.showAndWait();
                 primaryStage.setScene(mainMenuScene);
             }
