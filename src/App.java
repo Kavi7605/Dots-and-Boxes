@@ -12,11 +12,17 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import java.util.HashMap;
 import java.util.Map;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 
 public class App extends Application {  
     private Stage primaryStage;
-    private Scene mainMenuScene, gameBoardScene;
-    private static final int GRID_SIZE = 6;
+    private Scene mainMenuScene;
+    private static final int GRID_SIZE = 2;
     private static final int SPACING = 50;
     private static final int LINE_THICKNESS = 5;
 
@@ -28,17 +34,17 @@ public class App extends Application {
     Line[][] vLines, hLines;
     Rectangle[][] boxes;
 
-    private Player player1 = new Player("Player 1", Color.RED);
-    private Player player2 = new Player("Player 2", Color.BLUE);
+    private Player player1 = new Player("Player 1", Color.rgb(255, 85, 85));
+    private Player player2 = new Player("Player 2", Color.rgb(85, 170, 255));
     private Player currentPlayer = player1;
 
-    private Map<Line, Boolean> lineDrawn = new HashMap<>(); //Line as key and true/false for marked or not
+    private Map<Line, Boolean> lineDrawn = new HashMap<>();
     private Map<Rectangle, Player> boxOwner = new HashMap<>();
 
     private Label player1ScoreLabel = new Label();
     private Label player2ScoreLabel = new Label();
 
-    private int counter = 36;
+    private int boxCounter;
 
     public static void main(String[] args) {
         launch(args);
@@ -46,13 +52,8 @@ public class App extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        this.primaryStage = primaryStage;      
-        // Create main menu scene
+        this.primaryStage = primaryStage;
         mainMenuScene = createMainMenuScene();
-
-        // Create game board scene
-        gameBoardScene = createGameBoardScene();
-
         primaryStage.setTitle("Dots and Boxes"); 
         primaryStage.setScene(mainMenuScene);     
         primaryStage.setMaximized(true);
@@ -65,15 +66,12 @@ public class App extends Application {
         center.setAlignment(Pos.CENTER);
 
         Button playButton = new Button("Play");
-        playButton.setStyle("-fx-font-size: 16px; -fx-padding: 10px 20px; -fx-background-color: #008000; -fx-text-fill: white;"); 
-        playButton.setPrefWidth(100); 
-        playButton.setPrefHeight(50);
-        playButton.setOnAction(event -> primaryStage.setScene(gameBoardScene));
-
+        styleButton(playButton, "#32CD32", "#2E8B57");
+        
         Button quitButton = new Button("Quit");
-        quitButton.setStyle("-fx-font-size: 16px; -fx-padding: 10px 20px; -fx-background-color: #FF0000; -fx-text-fill: white;"); 
-        quitButton.setPrefWidth(100); 
-        quitButton.setPrefHeight(50);
+        styleButton(quitButton, "#FF4500", "#CD5C5C");
+        
+        playButton.setOnAction(event -> primaryStage.setScene(createGameBoardScene()));
         quitButton.setOnAction(event -> primaryStage.close());
 
         center.getChildren().addAll(playButton, quitButton);
@@ -83,96 +81,82 @@ public class App extends Application {
     } 
 
     private Scene createGameBoardScene() {
-
         hLines = new Line[GRID_SIZE][GRID_SIZE-1];
         vLines = new Line[GRID_SIZE-1][GRID_SIZE];
         boxes = new Rectangle[GRID_SIZE][GRID_SIZE];
 
-        player1 = new Player("Player 1", Color.RED);
-        player2 = new Player("Player 2", Color.BLUE);
+        player1 = new Player("Player 1", Color.rgb(255, 85, 85));
+        player2 = new Player("Player 2", Color.rgb(85, 170, 255));
         currentPlayer = player1;
 
-        lineDrawn = new HashMap<>(); 
+        lineDrawn = new HashMap<>();
         boxOwner = new HashMap<>();
 
         player1ScoreLabel = new Label();
         player2ScoreLabel = new Label();
+        infoLabel.setFont(Font.font("Arial", FontWeight.BOLD, 18));
+        infoLabel.setTextFill(Color.DARKSLATEBLUE);
+
+        boxCounter = (GRID_SIZE-1)*(GRID_SIZE-1);
 
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(LINE_THICKNESS+50, 0, 0, LINE_THICKNESS+50));
+        gridPane.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
 
-        int row, col;
-        for (row = 0; row < GRID_SIZE; row++) {
-            for (col = 0; col < GRID_SIZE; col++) {
+        for (int row = 0; row < GRID_SIZE; row++) {
+            for (int col = 0; col < GRID_SIZE; col++) {
                 AnchorPane stack = new AnchorPane();
-
-                //makes square
-                if(col < GRID_SIZE-1 && row < GRID_SIZE-1)
-                {
+                if(col < GRID_SIZE-1 && row < GRID_SIZE-1) {
                     Rectangle square = new Rectangle(0, 0, SPACING, SPACING);
-                    square.setFill(((row+col)%2==0)?Color.valueOf("#d6d6d6"):Color.valueOf("#bbbbbb"));
+                    square.setFill(((row+col)%2==0)?Color.valueOf("#E6E6FA"):Color.valueOf("#D8BFD8"));
                     square.setStrokeWidth(0);
                     stack.getChildren().add(square);
                     boxes[row][col] = square;
                 }
 
-                //makes H line
                 if(col < GRID_SIZE-1) {
                     Line lineUP = new Line(LINE_THICKNESS, 0, SPACING-LINE_THICKNESS, 0);
-                    stack.getChildren().add(lineUP); //added this line as children of Stack, stack is the parent
                     styleLine(lineUP, true);
                     lineDrawn.put(lineUP, false);
                     hLines[row][col] = lineUP;
+                    stack.getChildren().add(lineUP);
                 }
 
-                //makes v line
                 if(row < GRID_SIZE-1) {
                     Line lineLeft = new Line(0, LINE_THICKNESS, 0, SPACING-LINE_THICKNESS);
-                    stack.getChildren().add(lineLeft);
                     styleLine(lineLeft, false);
                     lineDrawn.put(lineLeft, false);
                     vLines[row][col] = lineLeft;
+                    stack.getChildren().add(lineLeft);
                 }
 
-                //makes dot
                 Circle dot = new Circle(0, 0, LINE_THICKNESS*2);
-                dot.setFill(Color.BLACK);
+                dot.setFill(Color.DARKSLATEBLUE);
                 stack.getChildren().add(dot);
 
-                gridPane.add(stack, col, row); //stack is added at row/col index, so im getting those values from stack parent
+                gridPane.add(stack, col, row);
             }
         }
 
-        //gpt code
-        // Create a border pane to hold the grid and scores
         BorderPane borderPane = new BorderPane();
-
-        // Create a grid pane for the score labels
         GridPane scoreGrid = new GridPane();
+
         Label player1Label = new Label("Player 1: ");
         Label player2Label = new Label("Player 2: ");
+        
         Button backButton = new Button("<");
-
-        backButton.setStyle("-fx-font-size: 24px; -fx-padding: 10px 20px; -fx-background-color: #0000FF; -fx-text-fill: white;"); 
-        backButton.setPrefWidth(100); 
-        backButton.setPrefHeight(50);
+        styleButton(backButton, "#1E90FF", "#4682B4");
+        
         backButton.setOnAction(event -> primaryStage.setScene(mainMenuScene));
 
         scoreGrid.add(backButton, 0, 0);
-
         scoreGrid.add(player1Label, 2, 1);
         scoreGrid.add(player1ScoreLabel, 3, 1);
-
         scoreGrid.add(player2Label, 2, 2);
         scoreGrid.add(player2ScoreLabel, 3, 2);
-
         scoreGrid.add(infoLabel, 2, 3);
-        infoLabel.setStyle("-fx-font-size: 20px;");
 
-        player1Label.setStyle("-fx-font-size: 20px;");
-        player2Label.setStyle("-fx-font-size: 20px;");
-        player1ScoreLabel.setStyle("-fx-font-size: 20px;");
-        player2ScoreLabel.setStyle("-fx-font-size: 20px;");
+        setLabelStyle(player1Label, player1ScoreLabel, player2Label, player2ScoreLabel);
 
         HBox hBox = new HBox();
         hBox.setAlignment(Pos.CENTER);
@@ -186,16 +170,21 @@ public class App extends Application {
         return new Scene(borderPane, screenSize.getWidth(), screenSize.getHeight());
     }
 
+    private void styleButton(Button button, String color, String hoverColor) {
+        button.setStyle("-fx-font-size: 16px; -fx-padding: 10px 20px; -fx-background-color: " + color + "; -fx-text-fill: white; -fx-background-radius: 10;");
+        button.setOnMouseEntered(e -> button.setStyle("-fx-background-color: " + hoverColor + "; -fx-text-fill: white; -fx-background-radius: 10;-fx-font-size: 16px; -fx-padding: 10px 20px;"));
+        button.setOnMouseExited(e -> button.setStyle("-fx-background-color: " + color + "; -fx-text-fill: white; -fx-background-radius: 10;-fx-font-size: 16px; -fx-padding: 10px 20px;"));
+        button.setEffect(new DropShadow());
+    }
+
     private void styleLine(Line line, boolean isLineUp) {
         line.setStroke(Color.TRANSPARENT);
-        //line.setStroke(Color.BLACK);
         line.setStrokeLineCap(StrokeLineCap.BUTT);
         line.setStrokeWidth(LINE_THICKNESS*2);
-        //line.setStroke(lineUnmarkedColor);
 
         line.setOnMouseEntered(event -> {
             if (!lineDrawn.get(line)) {
-                line.setStroke(Color.LIGHTGRAY);
+                line.setStroke(currentPlayer.getColor());
             }
         });
 
@@ -207,77 +196,87 @@ public class App extends Application {
 
         line.setOnMouseClicked(event -> {
             if (lineDrawn.get(line)) {
-                return; // Skip if line is already filled
+                return;
             }
 
-            line.setStroke(Color.valueOf("#212121"));
-
-            //puts this line inside hashmap as marked true
+            line.setStroke(Color.valueOf("#696969"));
             lineDrawn.put(line, true);
 
-            boolean boxCompleted = checkForCompletedBox(line, isLineUp);
-            if (!boxCompleted) {
-                // Switch turn if no box was completed
+            int boxCompleted = checkForCompletedBox(line, isLineUp);
+            if (boxCompleted==0) {
                 currentPlayer = (currentPlayer == player1) ? player2 : player1;
                 infoLabel.setText(currentPlayer.getName() + "'s turn");
             }
-            updateScores(); //this just refreshes the scores
-            if(counter == 0){
+            updateScores();
+            boxCounter -= boxCompleted;
+            if(boxCounter < 1){                
+                String winMsg = "It was a tie.";
+                if (player1.getScore()>player2.getScore()) {
+                    winMsg = "Player 1 Wins!!";
+                }
+                if (player1.getScore()<player2.getScore()) {
+                    winMsg = "Player 2 Wins!!";
+                }
                 
+                Alert alert = new Alert(AlertType.INFORMATION, winMsg, new ButtonType("Back to Main Menu"));
+                alert.setHeaderText(null);
+                alert.setContentText("Game Over");
+                alert.showAndWait();
+                primaryStage.setScene(mainMenuScene);
             }
         });
     }
 
-    private boolean checkForCompletedBox(Line line, boolean isLineUp) {
-        boolean boxCompleted = false;
+    private void setLabelStyle(Label player1Label, Label player1ScoreLabel, Label player2Label, Label player2ScoreLabel) {
+        player1Label.setFont(Font.font("Verdana", FontWeight.BOLD, 14));
+        player2Label.setFont(Font.font("Verdana", FontWeight.BOLD, 14));
+        player1ScoreLabel.setFont(Font.font("Arial", FontWeight.BOLD, 18));
+        player2ScoreLabel.setFont(Font.font("Arial", FontWeight.BOLD, 18));
+        player1Label.setTextFill(player1.getColor());
+        player2Label.setTextFill(player2.getColor());
+        player1ScoreLabel.setTextFill(player1.getColor());
+        player2ScoreLabel.setTextFill(player2.getColor());
+    }
 
-        //this two line gets the Parent AnchorPane and then the ROw/Column location on Grid pane
+    private int checkForCompletedBox(Line line, boolean isLineUp) {
+        int boxCompleted = 0;
         int row = GridPane.getRowIndex(line.getParent());
         int col = GridPane.getColumnIndex(line.getParent());
 
-        if(isLineUp) { //if horizontal line
-            if(row > 0) { //only runs if there is a box above
-                //checks the 3 lines, left, above and right side
+        if(isLineUp) {
+            if(row > 0) {
                 if (lineDrawn.get(vLines[row-1][col]) && lineDrawn.get(hLines[row-1][col]) && lineDrawn.get(vLines[row-1][col+1])) {
-                    //this is my boxes array that stores all the Rectangles
                     boxes[row-1][col].setFill(currentPlayer.getColor());
-                    //boxOwner is hashmap, just storing the player for the box
                     boxOwner.put(boxes[row-1][col], currentPlayer);
-                    currentPlayer.increaseScore(1); //adds 1 score
-                    boxCompleted = true; //this boolean is from chatgpt code, i kept it as it is
-                    counter--;
+                    currentPlayer.increaseScore(1);
+                    boxCompleted++;
                 }
             }
-                    //we want both checks, so no else if
-            if(row < GRID_SIZE-1) { //only runs if there is a box below
-                //checks the 3 lines, left , below and right side
+
+            if(row < GRID_SIZE-1) {
                 if (lineDrawn.get(vLines[row][col]) && lineDrawn.get(hLines[row+1][col]) && lineDrawn.get(vLines[row][col+1])) {
                     boxes[row][col].setFill(currentPlayer.getColor());
                     boxOwner.put(boxes[row][col], currentPlayer);
                     currentPlayer.increaseScore(1);
-                    boxCompleted = true;
-                    counter--;
+                    boxCompleted++;
                 }
             }
-        }
-
-        if(!isLineUp) { //if vertical line
+        } else {
             if(col > 0) {
                 if (lineDrawn.get(hLines[row][col-1]) && lineDrawn.get(vLines[row][col-1]) && lineDrawn.get(hLines[row+1][col-1])) {
                     boxes[row][col-1].setFill(currentPlayer.getColor());
                     boxOwner.put(boxes[row][col-1], currentPlayer);
                     currentPlayer.increaseScore(1);
-                    boxCompleted = true;
-                    counter--;
+                    boxCompleted++;
                 }
             }
+
             if(col < GRID_SIZE-1) {
                 if (lineDrawn.get(hLines[row][col]) && lineDrawn.get(vLines[row][col+1]) && lineDrawn.get(hLines[row+1][col])) {
                     boxes[row][col].setFill(currentPlayer.getColor());
                     boxOwner.put(boxes[row][col], currentPlayer);
                     currentPlayer.increaseScore(1);
-                    boxCompleted = true;
-                    counter--;
+                    boxCompleted++;
                 }
             }
         }

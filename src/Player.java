@@ -11,7 +11,6 @@ public class Player {
         this.score = 0;
     }
 
-    // Getters and setters for name, color, and score
     public String getName() {
         return name;
     }
