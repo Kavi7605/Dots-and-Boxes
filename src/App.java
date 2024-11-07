@@ -12,10 +12,14 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.swing.ImageIcon;
+
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.image.Image;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
@@ -58,6 +62,7 @@ public class App extends Application {
         primaryStage.setScene(mainMenuScene);     
         primaryStage.setMaximized(true);
         primaryStage.show();
+        primaryStage.getIcons().add(new Image("icon.png"));
     }
 
     private Scene createMainMenuScene() {
