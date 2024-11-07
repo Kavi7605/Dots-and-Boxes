@@ -22,7 +22,7 @@ import javafx.scene.text.FontWeight;
 public class App extends Application {  
     private Stage primaryStage;
     private Scene mainMenuScene;
-    private static final int GRID_SIZE = 2;
+    private static final int GRID_SIZE = 6;
     private static final int SPACING = 50;
     private static final int LINE_THICKNESS = 5;
 
