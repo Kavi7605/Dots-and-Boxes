@@ -25,6 +25,9 @@ import javafx.animation.FadeTransition;
 import javafx.util.Duration;
 import javafx.scene.effect.Glow;
 import javafx.scene.effect.BlurType;
+import javafx.animation.Timeline;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
 
 public class App extends Application {  
     private Stage primaryStage;
@@ -78,6 +81,25 @@ public class App extends Application {
         titleLabel.setFont(Font.font("Arial", FontWeight.BOLD, 48));
         titleLabel.setTextFill(Color.WHITE);
         titleLabel.setEffect(new DropShadow(20, Color.rgb(0, 0, 0, 0.5)));
+        
+        // Add animation to title label
+        FadeTransition fadeIn = new FadeTransition(Duration.millis(1000), titleLabel);
+        fadeIn.setFromValue(0.0);
+        fadeIn.setToValue(1.0);
+        fadeIn.play();
+        
+        // Add continuous glow animation
+        Glow glow = new Glow(0.0);
+        glow.setLevel(0.0);
+        titleLabel.setEffect(glow);
+        
+        Timeline glowAnimation = new Timeline(
+            new KeyFrame(Duration.ZERO, new KeyValue(glow.levelProperty(), 0.0)),
+            new KeyFrame(Duration.seconds(1), new KeyValue(glow.levelProperty(), 1.0)),
+            new KeyFrame(Duration.seconds(2), new KeyValue(glow.levelProperty(), 0.0))
+        );
+        glowAnimation.setCycleCount(Timeline.INDEFINITE);
+        glowAnimation.play();
         
         Label subtitleLabel = new Label("A Classic Strategy Game");
         subtitleLabel.setFont(Font.font("Arial", FontWeight.NORMAL, 20));
@@ -236,7 +258,10 @@ public class App extends Application {
                 AnchorPane stack = new AnchorPane();
                 if(col < GRID_SIZE-1 && row < GRID_SIZE-1) {
                     Rectangle square = new Rectangle(0, 0, SPACING, SPACING);
-                    square.setFill(((row+col)%2==0)?Color.valueOf("#E6E6FA"):Color.valueOf("#D8BFD8"));
+                    // Enhanced box colors with gradient
+                    square.setFill(((row+col)%2==0) ? 
+                        Color.valueOf("#E6E6FA") : 
+                        Color.valueOf("#D8BFD8"));
                     square.setStrokeWidth(0);
                     stack.getChildren().add(square);
                     boxes[row][col] = square;
@@ -260,6 +285,7 @@ public class App extends Application {
 
                 Circle dot = new Circle(0, 0, LINE_THICKNESS*2);
                 dot.setFill(Color.DARKSLATEBLUE);
+                dot.setEffect(new DropShadow(5, Color.rgb(0, 0, 0, 0.3)));
                 stack.getChildren().add(dot);
 
                 gridPane.add(stack, col, row);
@@ -267,11 +293,12 @@ public class App extends Application {
         }
 
         BorderPane borderPane = new BorderPane();
+        // Enhanced background with animated gradient
         borderPane.setStyle("-fx-background-color: linear-gradient(to bottom, #1a237e, #0d47a1);");
         
         VBox topBar = new VBox(10);
         topBar.setPadding(new Insets(20));
-        topBar.setStyle("-fx-background-color: rgba(0, 0, 0, 0.2);");
+        topBar.setStyle("-fx-background-color: rgba(0, 0, 0, 0.2); -fx-background-radius: 10;");
 
         HBox playerInfo = new HBox(40);
         playerInfo.setAlignment(Pos.CENTER);
@@ -288,6 +315,10 @@ public class App extends Application {
         player2ScoreLabel.setFont(Font.font("Arial", FontWeight.BOLD, 24));
         player1ScoreLabel.setTextFill(player1.getColor());
         player2ScoreLabel.setTextFill(player2.getColor());
+        
+        // Add glow effect to score labels
+        player1ScoreLabel.setEffect(new Glow(10));
+        player2ScoreLabel.setEffect(new Glow(10));
         
         player1Box.getChildren().addAll(player1Label, player1ScoreLabel);
         player2Box.getChildren().addAll(player2Label, player2ScoreLabel);
