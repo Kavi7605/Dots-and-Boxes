@@ -5,6 +5,7 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
@@ -12,24 +13,24 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import java.util.HashMap;
 import java.util.Map;
-import javax.swing.ImageIcon;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonType;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 
 public class App extends Application {  
     private Stage primaryStage;
     private Scene mainMenuScene;
-    private static final int GRID_SIZE = 6;
+    private static int GRID_SIZE = 6;
+    private static String player1Name = "Player 1";
+    private static String player2Name = "Player 2";
     private static final int SPACING = 50;
     private static final int LINE_THICKNESS = 5;
-
-    private String info = "Player 1's turn";
-    public Label infoLabel = new Label(info);
+    public Label infoLabel = new Label();
 
     private Rectangle2D screenSize = Screen.getPrimary().getVisualBounds();
 
@@ -67,14 +68,15 @@ public class App extends Application {
         BorderPane root = new BorderPane();
         VBox center = new VBox(20);
         center.setAlignment(Pos.CENTER);
+        center.setStyle("-fx-background-color: #e0f7fa;");
 
         Button playButton = new Button("Play");
-        styleButton(playButton, "#32CD32", "#2E8B57");
+        styleButton(playButton, "#4CAF50", "#388E3C");
         
         Button quitButton = new Button("Quit");
-        styleButton(quitButton, "#FF4500", "#CD5C5C");
+        styleButton(quitButton, "#F44336", "#D32F2F");
         
-        playButton.setOnAction(event -> primaryStage.setScene(createGameBoardScene()));
+        playButton.setOnAction(event -> primaryStage.setScene(optionScene()));
         quitButton.setOnAction(event -> primaryStage.close());
 
         center.getChildren().addAll(playButton, quitButton);
@@ -83,14 +85,88 @@ public class App extends Application {
         return new Scene(root, screenSize.getWidth(), screenSize.getHeight());
     } 
 
+    private Scene optionScene() {
+        BorderPane root = new BorderPane();
+        GridPane grid = new GridPane();
+        grid.setAlignment(Pos.CENTER);
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(25, 25, 25, 25));
+        VBox vBox = new VBox(20);
+        vBox.setAlignment(Pos.CENTER);
+        vBox.setStyle("-fx-background-color: #e0f7fa;");
+
+        Label player1Label = new Label("Player 1:");
+        player1Label.setFont(Font.font("Arial", FontWeight.BOLD, 18));
+        player1Label.setTextFill(Color.DARKSLATEBLUE);
+
+        Label player2Label = new Label("Player 2:");
+        player2Label.setFont(Font.font("Arial", FontWeight.BOLD, 18));
+        player2Label.setTextFill(Color.DARKSLATEBLUE);
+        
+        Label gridSize = new Label("Grid Size:");
+        gridSize.setFont(Font.font("Arial", FontWeight.BOLD, 18));
+        gridSize.setTextFill(Color.DARKSLATEBLUE);
+
+        Button confirmButton = new Button("Confirm");
+        styleButton(confirmButton, "#4CAF50", "#388E3C");
+        confirmButton.setOnAction(event -> primaryStage.setScene(createGameBoardScene()));
+
+        Button backButton = new Button("Main menu");
+        styleButton(backButton, "#2196F3", "#1976D2");
+        backButton.setOnAction(event -> primaryStage.setScene(mainMenuScene));
+
+        TextField p1Name = new TextField("");
+        TextField p2Name = new TextField("");
+        p1Name.setPromptText("Enter Player 1 Name");
+        p2Name.setPromptText("Enter Player 2 Name");
+        p1Name.setMaxWidth(200);
+        p2Name.setMaxWidth(200);
+        p1Name.setAlignment(Pos.CENTER);
+        p2Name.setAlignment(Pos.CENTER);
+        p1Name.setStyle("-fx-font-size: 16px; -fx-padding: 10px 20px; -fx-background-color: #E6E6FA; -fx-text-fill: black; -fx-background-radius: 10;");
+        p2Name.setStyle("-fx-font-size: 16px; -fx-padding: 10px 20px; -fx-background-color: #E6E6FA; -fx-text-fill: black; -fx-background-radius: 10;");
+        p1Name.textProperty().addListener((observable, oldValue, newValue) -> {
+            player1Name = newValue;
+        });
+        p2Name.textProperty().addListener((observable, oldValue, newValue) -> {
+            player2Name = newValue;
+        });
+
+        ComboBox<String> gridField = new ComboBox<>();
+        gridField.getItems().addAll("4x4","5x5","6x6", "7x7", "8x8");
+        gridField.setValue("6x6");
+        gridField.setMaxWidth(200);
+        gridField.setStyle("-fx-font-size: 16px; -fx-padding: 10px 20px; -fx-background-color: #E6E6FA; -fx-text-fill: black; -fx-background-radius: 10;");
+        gridField.setOnAction(event -> {
+            GRID_SIZE = Integer.parseInt(gridField.getSelectionModel().getSelectedIndex()+4+"");
+        });
+
+        HBox hBox = new HBox();
+        hBox.setAlignment(Pos.CENTER);
+        hBox.getChildren().addAll(backButton, confirmButton);
+        hBox.setSpacing(30);
+        grid.add(player1Label, 0, 0);
+        grid.add(player2Label, 0, 1);
+        grid.add(gridSize, 0, 2);
+        grid.add(p1Name, 1, 0);
+        grid.add(p2Name, 1, 1);
+        grid.add(gridField, 1, 2);
+        vBox.getChildren().addAll(grid, hBox);
+        root.setCenter(vBox);
+
+        return new Scene(root, screenSize.getWidth(), screenSize.getHeight());
+    }
+
     private Scene createGameBoardScene() {
         hLines = new Line[GRID_SIZE][GRID_SIZE-1];
         vLines = new Line[GRID_SIZE-1][GRID_SIZE];
         boxes = new Rectangle[GRID_SIZE][GRID_SIZE];
 
-        player1 = new Player("Player 1", Color.rgb(255, 85, 85));
-        player2 = new Player("Player 2", Color.rgb(85, 170, 255));
+        player1 = new Player(player1Name, Color.rgb(255, 85, 85));
+        player2 = new Player(player2Name, Color.rgb(85, 170, 255));
         currentPlayer = player1;
+        infoLabel.setText(currentPlayer.getName() + "'s turn");
 
         lineDrawn = new HashMap<>();
         boxOwner = new HashMap<>();
@@ -143,11 +219,11 @@ public class App extends Application {
         BorderPane borderPane = new BorderPane();
         GridPane scoreGrid = new GridPane();
 
-        Label player1Label = new Label("Player 1: ");
-        Label player2Label = new Label("Player 2: ");
+        Label player1Label = new Label(player1Name+":");
+        Label player2Label = new Label(player2Name+":");
         
         Button backButton = new Button("<");
-        styleButton(backButton, "#1E90FF", "#4682B4");
+        styleButton(backButton, "#2196F3", "#1976D2");
         
         backButton.setOnAction(event -> primaryStage.setScene(mainMenuScene));
 
@@ -214,10 +290,10 @@ public class App extends Application {
             if(boxCounter < 1){                
                 String winMsg = "It was a tie.";
                 if (player1.getScore()>player2.getScore()) {
-                    winMsg = "Player 1 Wins!!";
+                    winMsg = player1Name+" Wins!!";
                 }
                 if (player1.getScore()<player2.getScore()) {
-                    winMsg = "Player 2 Wins!!";
+                    winMsg = player2Name+" Wins!!";
                 }
                 
                 Alert alert = new Alert(AlertType.INFORMATION, winMsg, new ButtonType("Back to Main Menu"));
