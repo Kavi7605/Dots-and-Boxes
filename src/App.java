@@ -37,7 +37,7 @@ public class App extends Application {
     private static String player2Name = "Player 2";
     private static final int SPACING = 50;
     private static final int LINE_THICKNESS = 5;
-    public Label infoLabel = new Label();
+    private Label infoLabel = new Label();
 
     private Rectangle2D screenSize = Screen.getPrimary().getVisualBounds();
 
