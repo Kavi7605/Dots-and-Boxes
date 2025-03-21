@@ -1,3 +1,4 @@
+//Importing classes from JavaFX package
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -30,6 +31,9 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 
 public class App extends Application {  
+    //class variable definitions
+    // This class defines the primary game elements for the Dots and Boxes game, 
+    // including the stage, scenes, grid settings, players, UI elements, and game state tracking.
     private Stage primaryStage;
     private Scene mainMenuScene;
     private static int GRID_SIZE = 6;
@@ -38,28 +42,26 @@ public class App extends Application {
     private static final int SPACING = 50;
     private static final int LINE_THICKNESS = 5;
     private Label infoLabel = new Label();
-
     private Rectangle2D screenSize = Screen.getPrimary().getVisualBounds();
-
     Line[][] vLines, hLines;
     Rectangle[][] boxes;
-
     private Player player1 = new Player("Player 1", Color.rgb(255, 85, 85));
     private Player player2 = new Player("Player 2", Color.rgb(85, 170, 255));
     private Player currentPlayer = player1;
-
     private Map<Line, Boolean> lineDrawn = new HashMap<>();
     private Map<Rectangle, Player> boxOwner = new HashMap<>();
-
     private Label player1ScoreLabel = new Label();
     private Label player2ScoreLabel = new Label();
-
     private int boxCounter;
 
+    // Main method to run the application
+    // This method is the entry point for the JavaFX application.
     public static void main(String[] args) {
         launch(args);
     }
 
+    // Start method to initialize the primary stage
+    // This method initializes the primary stage and sets the main menu scene as the initial scene.
     @Override
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
@@ -71,6 +73,8 @@ public class App extends Application {
         primaryStage.getIcons().add(new Image("icon.png"));
     }
 
+    // Create main menu scene
+    // This method creates the main menu scene with the title, subtitle, and buttons for starting the game or exiting the application.
     private Scene createMainMenuScene() {
         BorderPane root = new BorderPane();
         VBox center = new VBox(30);
@@ -121,6 +125,8 @@ public class App extends Application {
         return new Scene(root, screenSize.getWidth(), screenSize.getHeight());
     } 
 
+    // Create game settings scene
+    // This method creates the game settings scene with text fields for entering player names and a combo box for selecting the grid size.
     private Scene optionScene() {
         BorderPane root = new BorderPane();
         VBox vBox = new VBox(30);
@@ -191,12 +197,14 @@ public class App extends Application {
         return new Scene(root, screenSize.getWidth(), screenSize.getHeight());
     }
 
+    // styleLabel method to style labels
     private void styleLabel(Label label) {
         label.setFont(Font.font("Arial", FontWeight.BOLD, 18));
         label.setTextFill(Color.WHITE);
         label.setEffect(new DropShadow(5, Color.rgb(0, 0, 0, 0.3)));
     }
 
+    // styleTextField method to style text fields
     private void styleTextField(TextField textField) {
         textField.setMaxWidth(250);
         textField.setAlignment(Pos.CENTER);
@@ -205,6 +213,7 @@ public class App extends Application {
         textField.setEffect(new DropShadow(5, Color.rgb(0, 0, 0, 0.2)));
     }
 
+    // styleComboBox method to style combo boxes
     private void styleComboBox(ComboBox<String> comboBox) {
         comboBox.setMaxWidth(250);
         comboBox.setStyle("-fx-font-size: 16px; -fx-padding: 12px; -fx-background-color: rgba(255, 255, 255, 0.9); " +
@@ -212,6 +221,7 @@ public class App extends Application {
         comboBox.setEffect(new DropShadow(5, Color.rgb(0, 0, 0, 0.2)));
     }
 
+    // styleButton method to style buttons
     private void styleButton(Button button, String color, String hoverColor) {
         button.setStyle("-fx-font-size: 18px; -fx-padding: 15px 30px; -fx-background-color: " + color + "; " +
                        "-fx-text-fill: white; -fx-background-radius: 25; -fx-font-weight: bold;");
@@ -230,6 +240,8 @@ public class App extends Application {
         });
     }
 
+    // Create game board scene  
+    // This method creates the game board scene with the grid of dots, lines, and boxes, as well as the player scores and turn information.
     private Scene createGameBoardScene() {
         hLines = new Line[GRID_SIZE][GRID_SIZE-1];
         vLines = new Line[GRID_SIZE-1][GRID_SIZE];
@@ -346,6 +358,8 @@ public class App extends Application {
         return new Scene(borderPane, screenSize.getWidth(), screenSize.getHeight());
     }
 
+    // styleLine method to style lines
+    // This method styles the lines in the game board grid with color, thickness, and effects.
     private void styleLine(Line line, boolean isLineUp) {
         line.setStroke(Color.TRANSPARENT);
         line.setStrokeLineCap(StrokeLineCap.ROUND);
@@ -409,6 +423,8 @@ public class App extends Application {
         });
     }
 
+    // checkForCompletedBox method to check for completed boxes
+    // This method checks if a box is completed by checking if all four lines around the box have been drawn.
     private int checkForCompletedBox(Line line, boolean isLineUp) {
         int boxCompleted = 0;
         int row = GridPane.getRowIndex(line.getParent());
@@ -454,6 +470,8 @@ public class App extends Application {
         return boxCompleted;
     }
 
+    // updateScores method to update player scores
+    // This method updates the player scores displayed on the game board.
     private void updateScores() {
         player1ScoreLabel.setText(String.valueOf(player1.getScore()));
         player2ScoreLabel.setText(String.valueOf(player2.getScore()));
