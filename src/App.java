@@ -5,6 +5,7 @@ import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
@@ -36,7 +37,7 @@ public class App extends Application {
     // including the stage, scenes, grid settings, players, UI elements, and game state tracking.
     private Stage primaryStage;
     private Scene mainMenuScene;
-    private static int GRID_SIZE = 6;
+    private static int GRID_SIZE = 7;
     private static String player1Name = "Player 1";
     private static String player2Name = "Player 2";
     private static final int SPACING = 50;
@@ -167,7 +168,11 @@ public class App extends Application {
 
         ComboBox<String> gridField = new ComboBox<>();
         gridField.getItems().addAll("4x4","5x5","6x6", "7x7", "8x8");
-        gridField.setValue("6x6");
+        gridField.getSelectionModel().select(2);
+        GRID_SIZE = 7;
+        gridField.setOnAction(event -> {
+            GRID_SIZE = gridField.getSelectionModel().getSelectedIndex()+5;
+        });
         styleComboBox(gridField);
 
         Button confirmButton = new Button("Start Game");
@@ -407,6 +412,8 @@ public class App extends Application {
                     winMsg = player2Name + " Wins!!";
                 }
                 
+                ButtonType loginButtonType = new ButtonType("Back to Main Menu", ButtonData.OK_DONE);
+                ButtonType replaButtonType = new ButtonType("Replay", ButtonData.OK_DONE);
                 Alert alert = new Alert(AlertType.INFORMATION, winMsg, new ButtonType("Back to Main Menu"));
                 alert.setTitle("Game Over");
                 alert.setHeaderText(null);
