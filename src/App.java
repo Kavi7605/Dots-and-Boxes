@@ -76,7 +76,6 @@ public class App extends Application {
     // Create main menu scene
     // This method creates the main menu scene with the title, subtitle, and buttons for starting the game or exiting the application.
     private Scene createMainMenuScene() {
-        BorderPane root = new BorderPane();
         VBox center = new VBox(30);
         center.setAlignment(Pos.CENTER);
         center.setStyle("-fx-background-color: linear-gradient(to bottom, #1a237e, #0d47a1);");
@@ -120,9 +119,8 @@ public class App extends Application {
         quitButton.setOnAction(event -> primaryStage.close());
 
         center.getChildren().addAll(titleLabel, subtitleLabel, playButton, quitButton);
-        root.setCenter(center);
 
-        return new Scene(root, screenSize.getWidth(), screenSize.getHeight());
+        return new Scene(center, screenSize.getWidth(), screenSize.getHeight());
     } 
 
     // Create game settings scene
@@ -252,8 +250,6 @@ public class App extends Application {
         currentPlayer = player1;
         infoLabel.setText(currentPlayer.getName() + "'s turn");
 
-        lineDrawn = new HashMap<>();
-        boxOwner = new HashMap<>();
 
         player1ScoreLabel = new Label();
         player2ScoreLabel = new Label();
