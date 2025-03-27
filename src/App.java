@@ -412,8 +412,8 @@ public class App extends Application {
                     winMsg = player2Name + " Wins!!";
                 }
                 
-                ButtonType loginButtonType = new ButtonType("Back to Main Menu", ButtonData.OK_DONE);
-                ButtonType replaButtonType = new ButtonType("Replay", ButtonData.OK_DONE);
+                // ButtonType loginButtonType = new ButtonType("Back to Main Menu", ButtonData.OK_DONE);
+                // ButtonType replayButtonType = new ButtonType("Replay", ButtonData.OK_DONE);
                 Alert alert = new Alert(AlertType.INFORMATION, winMsg, new ButtonType("Back to Main Menu"));
                 alert.setTitle("Game Over");
                 alert.setHeaderText(null);
@@ -473,7 +473,7 @@ public class App extends Application {
         return boxCompleted;
     }
 
-    // updateScores method to update player scores
+    // updateScores method to update player scores  
     // This method updates the player scores displayed on the game board.
     private void updateScores() {
         player1ScoreLabel.setText(String.valueOf(player1.getScore()));
