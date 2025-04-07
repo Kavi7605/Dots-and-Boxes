@@ -1,3 +1,4 @@
+
 //Importing classes from JavaFX package
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -30,11 +31,18 @@ import javafx.scene.effect.BlurType;
 import javafx.animation.Timeline;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
+import java.io.FileInputStream;
+import java.io.IOException;
+
 
 public class App extends Application {  
     //class variable definitions
     // This class defines the primary game elements for the Dots and Boxes game, 
     // including the stage, scenes, grid settings, players, UI elements, and game state tracking.
+    
     private Stage primaryStage;
     private Scene mainMenuScene;
     private static int GRID_SIZE = 7;
@@ -65,6 +73,7 @@ public class App extends Application {
     // This method initializes the primary stage and sets the main menu scene as the initial scene.
     @Override
     public void start(Stage primaryStage) {
+        initializeFirebase();
         this.primaryStage = primaryStage;
         mainMenuScene = createMainMenuScene();
         primaryStage.setTitle("Dots and Boxes"); 
@@ -479,4 +488,22 @@ public class App extends Application {
         player1ScoreLabel.setText(String.valueOf(player1.getScore()));
         player2ScoreLabel.setText(String.valueOf(player2.getScore()));
     }
+    public void initializeFirebase() {
+        try {
+            FileInputStream serviceAccount = new FileInputStream("src/resources/google-services.json");
+    
+            FirebaseOptions options = FirebaseOptions.builder()
+                    .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                    .build();
+    
+            if (FirebaseApp.getApps().isEmpty()) {
+                FirebaseApp.initializeApp(options);
+                System.out.println("✅ Firebase has been initialized successfully!");
+            }
+    
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("❌ Error initializing Firebase: " + e.getMessage());
+        }
+    }    
 }
